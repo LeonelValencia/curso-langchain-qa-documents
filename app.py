@@ -5,12 +5,13 @@ from typing import Sequence
 import streamlit as st
 from dotenv import load_dotenv
 from langchain.base_language import BaseLanguageModel
-from langchain.chat_models import ChatOpenAI
-from langchain.document_transformers import LongContextReorder
-from langchain.embeddings import OpenAIEmbeddings
+from langchain_community.document_transformers import LongContextReorder
+from langchain_openai import OpenAIEmbeddings
+from langchain_openai import ChatOpenAI
 from langchain.indexes import SQLRecordManager
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder, PromptTemplate
-from langchain.retrievers import BM25Retriever, EnsembleRetriever
+# from langchain_community.retrievers import BM25Retriever
+# from langchain.retrievers.ensemble import EnsembleRetriever
 from langchain.retrievers.multi_query import MultiQueryRetriever
 from langchain.schema import (
     AIMessage,
@@ -21,55 +22,71 @@ from langchain.schema import (
 )
 from langchain.schema.messages import BaseMessageChunk
 from langchain.schema.runnable import Runnable, RunnableMap
-from langchain.vectorstores import Chroma
+from langchain_chroma import Chroma
 
 load_dotenv()
+# vectorstore = Chroma(
+#     collection_name="langchain_docs_app",
+#     persist_directory="data/chroma/langchain_docs_app/",
+#     embedding_function=OpenAIEmbeddings(),
+# )
+
+# record_manager = SQLRecordManager(
+#     namespace="chroma/langchain_docs_app",
+#     db_url="sqlite:///data/langchain_docs_app.db",
+# )
+
+# vector_keys = vectorstore.get(
+#     ids=record_manager.list_keys(), include=["documents", "metadatas"]
+# )
+
+# docs_in_vectorstore = [
+#     Document(page_content=page_content, metadata=metadata)
+#     for page_content, metadata in zip(
+#         vector_keys["documents"], vector_keys["metadatas"]
+#     )
+# ]
+
+# keyword_retriever = BM25Retriever.from_documents(docs_in_vectorstore)
+# keyword_retriever.k = 6
+
+# semantic_retriever = vectorstore.as_retriever(
+#     search_type="mmr",
+#     search_kwargs={
+#         "k": 6,
+#         "fetch_k": 20,
+#         "lambda_mult": 0.3,
+#     },
+# )
+
+# queries_llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-16k")
+# multi_query_retriever = MultiQueryRetriever.from_llm(
+#     retriever=semantic_retriever,
+#     llm=queries_llm,
+# )
+
+# retriever = EnsembleRetriever(
+#     retrievers=[keyword_retriever, multi_query_retriever],
+#     weights=[0.3, 0.7],
+#     c=0,
+# )
+# agen_executer = create_csv_agent(llm, "tablePromoters.tsv", pandas_kwargs={"sep":"\t"},verbose=False)
+embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
+
 vectorstore = Chroma(
-    collection_name="langchain_docs_app",
-    persist_directory="data/chroma/langchain_docs_app/",
-    embedding_function=OpenAIEmbeddings(),
+    persist_directory="data/chroma/regulondb", 
+    embedding_function=embeddings,
+    collection_name="promotores"
 )
 
-record_manager = SQLRecordManager(
-    namespace="chroma/langchain_docs_app",
-    db_url="sqlite:///data/langchain_docs_app.db",
-)
-
-vector_keys = vectorstore.get(
-    ids=record_manager.list_keys(), include=["documents", "metadatas"]
-)
-
-docs_in_vectorstore = [
-    Document(page_content=page_content, metadata=metadata)
-    for page_content, metadata in zip(
-        vector_keys["documents"], vector_keys["metadatas"]
-    )
-]
-
-keyword_retriever = BM25Retriever.from_documents(docs_in_vectorstore)
-keyword_retriever.k = 6
-
-semantic_retriever = vectorstore.as_retriever(
-    search_type="mmr",
+retriever = vectorstore.as_retriever(
+    search_type="similarity",
     search_kwargs={
-        "k": 6,
-        "fetch_k": 20,
-        "lambda_mult": 0.3,
+        "k": 100,
+        # "fetch_k": 20,
+        # "lambda_mult": 0.3,
     },
 )
-
-queries_llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-16k")
-multi_query_retriever = MultiQueryRetriever.from_llm(
-    retriever=semantic_retriever,
-    llm=queries_llm,
-)
-
-retriever = EnsembleRetriever(
-    retrievers=[keyword_retriever, multi_query_retriever],
-    weights=[0.3, 0.7],
-    c=0,
-)
-
 
 CONDENSE_QUESTION_TEMPLATE = """\
 Given the following conversation and a follow up question, rephrase the follow up \
@@ -90,27 +107,15 @@ Follow Up Input: {question}
 Standalone Question:"""
 
 SYSTEM_ANSWER_QUESTION_TEMPLATE = """\
-You are an expert programmer and problem-solver, tasked with answering any question \
-about 'Langchain' with high quality answers and without making anything up.
-
-Generate a comprehensive and informative answer of 80 words or less for the \
-given question based solely on the provided search results (URL and content). You must \
-only use information from the provided search results. Use an unbiased and \
-journalistic tone. Combine search results together into a coherent answer. Do not \
-repeat text. Cite search results using [${{number}}] notation. Only cite the most \
-relevant results that answer the question accurately. Place these citations at the end \
-of the sentence or paragraph that reference them - do not put them all at the end. If \
-different results refer to different entities within the same name, write separate \
-answers for each entity.
-
-If you are unsure about how to import an element from the library, write something down \
-but make it clear that you are unsure. In addition, include what should be the expected \
-behavior of the element.
+You are an expert in Molecular Biology, particularly in the area of microbial gene regulation, \
+so you are familiar with the names of genes, promoters, regulatory proteins and their interactions.\
+    
+If you are asked for a list, give the complete list and not just a sample.
 
 If there is nothing in the context relevant to the question at hand, just say "Hmm, \
 I'm not sure.". Don't try to make up an answer. This is not a suggestion. This is a rule.
 
-Anything between the following `context` html blocks is retrieved from a knowledge \
+Anything between the following `context` is retrieved from a knowledge \
 bank, not part of the conversation with the user.
 
 <context>
@@ -119,11 +124,11 @@ bank, not part of the conversation with the user.
 
 REMBEMBER: If there is no relevant information within the context, just say "Hmm, \
 I'm not sure.". Don't try to make up an answer. This is not a suggestion. This is a rule. \
-Anything between the preceding 'context' html blocks is retrieved from a knowledge bank, \
+Anything between the preceding 'context' is retrieved from a knowledge bank, \
 not part of the conversation with the user.
 
-Take a deep breath and relax. You are an expert programmer and problem-solver. You can do this.
-You can cite all the relevant information from the search results. Let's go!"""
+Take a deep breath and relax. You are an expert in Molecular Biology. You can do this.
+Let's go!"""
 
 
 def create_retriever_chain(
@@ -211,9 +216,11 @@ def create_answer_chain(
     return response_chain
 
 
-st.title("Chat with Langchain")
+st.title("Chat with RegulonDB Assistant")
 
 st.subheader("It uses a combination of keyword and semantic search to find answers.")
+
+# onAgent = st.toggle("Activate large responses")
 
 # Initialize chat history
 if "messages" not in st.session_state:
@@ -225,7 +232,7 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # Accept user input
-if prompt := st.chat_input("What is LangChain Expression Language?"):
+if prompt := st.chat_input("Listame todos los nombres de los promotores que esten regulados por el sigma factor sigma54"):
     # Add user message to chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
 
@@ -236,7 +243,7 @@ if prompt := st.chat_input("What is LangChain Expression Language?"):
     # Display assistant response in chat message container
     with st.chat_message("assistant"):
         # Create answer chain
-        llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-16k")
+        llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-16k", max_tokens=500)
 
         use_chat_history = len(st.session_state.messages) > 1
 
@@ -252,7 +259,7 @@ if prompt := st.chat_input("What is LangChain Expression Language?"):
             llm=llm,
             retriever=retriever,
             use_chat_history=use_chat_history,
-            k=6,
+            # k=6,
         )
 
         message_placeholder = st.empty()
