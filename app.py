@@ -218,8 +218,6 @@ def create_answer_chain(
 
 st.title("Chat with RegulonDB Assistant")
 
-st.subheader("It uses a combination of keyword and semantic search to find answers.")
-
 # onAgent = st.toggle("Activate large responses")
 
 # Initialize chat history

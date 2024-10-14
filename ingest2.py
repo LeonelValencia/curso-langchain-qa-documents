@@ -19,14 +19,6 @@ def load_data():
 
     loader = CSVLoader(file_path='tablePromoters.tsv',csv_args={
         'delimiter': '\t',
-        # "fieldnames": ["ID of promoter", "name of promoter", "synonyms", "operon's strand", "transcription start site (TSS)", 
-        #                "firstGene's distance to promoter", "first gene's name", "promoter's sequence", 
-        #                "nucleotide", "relative position box -10", "relative position box -35", 
-        #                "right end position of box -10", "left end position of box -10", 
-        #                "right end position of box -35", "left end position of box -35", 
-        #                "sequence of box -10", "sequence of box -35", "name of bind Sigma Factor", "name of transcription unit (TU)", 
-        #                "promotor's note", "evidence with pmid", "pmid", "name of citations's evidence", 
-        #                "promoter's genes", "regulator's name","sequence of regulatory site"],
         "fieldnames": ["promoter id", "promoter name", "strand", "position of Transcription Start Site (TSS)", "sigma factor", 
                        "promoter sequence", "first gene", "distance to first gene", 
                        "evidence", "Additive Evidence", "confidence level (C: Confirmed, S: Strong, W: Weak)", 
