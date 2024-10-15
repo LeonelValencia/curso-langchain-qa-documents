@@ -1,4 +1,4 @@
-1)tuId	2)tuName	3)operonName	4)tuGenes	5)pmName	6)tuEvidence	7)addEvidence	8)confidenceLevel   9)pmids 
+tuId	tuName	operonName	tuGenes	pmName	tuEvidence	addEvidence	confidenceLevel   pmids 
 RDBECOLITUC00080	yjtD	yjtD	yjtD;		[COMP-AINF:W]		W
 RDBECOLITUC00081	yaaX	yaaX	yaaX;		[COMP-AINF:W]		W
 RDBECOLITUC00082	yaaA	yaaA	yaaA;		[COMP-AINF:W]		W
