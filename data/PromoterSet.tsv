@@ -1,4 +1,4 @@
-pmId	pmName	strand	posTSS	sigmaFactor	pmSequence	firstGeneName	distToFirstGene	pmEvidence	addEvidence	confidenceLevel	pmids
+pmId	pmName	strand	posTSS	sigmaFactor	pmSequence	firstGeneName	distToFirstGene	pmEvidence	addEvidence	confidenceLevel	pmids(reference)
 RDBECOLIPMC00001	spyp	reverse	1825688.0	sigma70	acactttcattgttttaccgttgctctgattaattgacgctaaagtcagtaaagttaatcTcgtcaacacggcacgctact	spy	-63.0	[COMP-AINF:W][COMP-HINF-POSITIONAL-IDENTIFICATION:W][EXP-IDA-TRANSCRIPTION-INIT-MAPPING:S]		STRONG	14529615;16861804;9068658 
 RDBECOLIPMC00002	yfeKp	forward	2537315.0	sigma24	ccgatgatcctcatcgtaatccaaccgaaactttacctgattctggcagtcaaatcggctAtcacaaaacaaggataaggt	yfeK	-27.0	[COMP-AINF:W][COMP-AINF-POSITIONAL-IDENTIFICATION:W][EXP-IDA-TRANSCRIPTION-INIT-MAPPING:S]		STRONG	14529615;16336047 
 RDBECOLIPMC00003	bepAp1	forward	2616068.0	sigma24	gccgttacactcaaaggcggcgcggtgggaacgatatttcacagtatcggtcaaatgactAtctccagaaatacaggatag	bepA	-26.0	[COMP-AINF:W][COMP-AINF-POSITIONAL-IDENTIFICATION:W][EXP-IDA-TRANSCRIPTION-INIT-MAPPING:S]		STRONG	14529615;16336047;31992590 
