@@ -47,20 +47,6 @@ poetry shell
 - Obtención de las variables de entorno:
 
     - `OPENAI_API_KEY`: API Key de OpenAI.
-    - `DOCUGAMI_API_KEY`: API Key de Docugami.
-    - `CO_API_KEY`: API Key de Cohere.
-
-- Ingesta de datos con:
-
-    ```bash
-    python ingest.py
-    ```
-
-    o
-    
-    ```bash
-    poetry run python ingest.py
-    ```
 
 - Inicialización de la aplicación con:
 
